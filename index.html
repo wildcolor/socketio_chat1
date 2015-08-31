@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Socket.IO chat</title>
+		<style>
+			* {margin:0; padding: 0; box-sizing: border-box;}
+			body {font: 13px Helvetica, Arial;}
+			#messageForm { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+			#messageForm input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+			#messageForm button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+			#messages { list-style-type: none; margin: 0; padding: 2px; border:2px solid #000; }
+			#messages li { padding: 5px 10px; }
+			#messages li:nth-child(odd) { background: #fee; }
+
+			#main {display:none;}
+
+		</style>
+
+	</head>
+
+	<body>
+		<div id="nickname">
+			<h1> please enter your username </h1>
+			<p id="usernameError"></p>
+			<form id="nicknameForm">
+				<input size = '35' id='nicknameInput'></input>
+				<button style="border:none;background:rgb(130,224,255);padding: 10px";>log in</button>
+			</form>
+		</div>
+
+		<div id="main">
+			<ul id="messages"></ul>
+		    <form id="messageForm" action="">
+		    	<input id="m" autocomplete="off" /><button>Send</button>
+		    </form>
+	    </div>
+
+
+	  	<script src="/socket.io/socket.io.js"></script>
+	  	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	  	<script>
+	  		$(function(){
+	  			// $('#main').hide();
+	  			console.log('doc ready');
+	  			var socket = io();
+	  			var username;
+
+	  			$('#nicknameForm').submit(function(){
+	  				socket.emit('submit nickname', $('#nicknameInput').val());
+	  				$('#nicknameInput').val('');
+	  				return false;
+	  			});
+
+	  			socket.on('user logged in',function(name){
+	  				$('#nickname').hide();
+	  				$('#main').show();
+	  				username = name;
+	  			});
+
+	  			socket.on('username already in use',function(data){
+	  				$('#usernameError').text('username already in use');	  				
+	  				$('#usernameError').css('color','red');
+	  			});
+
+	  			
+
+		  		$('#messageForm').submit(function(){
+		  			socket.emit('chat message',$('#m').val());
+		  			$('#m').val('');
+		  			return false;
+		  		});
+		  		socket.on('chat message',function(data){
+		  			var wholeMsg = "<b><i>"+data.username+": </i></b>"+data.msg;
+		  			$('#messages').append($('<li>').html(wholeMsg));
+		  			console.log('client received a message from server: '+data.msg);
+		  		});
+
+		  		socket.on('new user connected',function(msg){
+		  			var newUserMsg = 'new user '+msg+' conntected';
+		  			var content = "<li style='color:red';>"+newUserMsg+"</li>";
+		  			$('#messages').append(content);
+		  		});
+	  		});
+	  		
+	  	</script>
+	</body>
+
+</html>
