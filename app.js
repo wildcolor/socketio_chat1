@@ -2,7 +2,7 @@ var app = require('express')(),
 	http = require('http').Server(app),
 	io = require('socket.io')(http),
 	users = [];
-
+//insert a new line here
 app.get('/', function(req, res){
 	res.sendFile(__dirname + '/index.html');
 	// res.send('<h1>helllo world</h1>');
